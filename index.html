@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>채은의 AML 워크스페이스 — Practitioner Archive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBFBF9;
+    --ink:#22282E;
+    --muted:#6B7480;
+    --line:#E4E2DB;
+    --ledger:#1F6B52;
+    --ledger-soft:#EAF2EE;
+    --stamp:#B4452F;
+    --side:#F3F2EC;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'IBM Plex Sans KR',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    display:flex;
+    font-size:15px;
+    line-height:1.7;
+  }
+
+  /* ── 사이드바 ── */
+  aside{
+    width:240px;
+    flex-shrink:0;
+    background:var(--side);
+    border-right:1px solid var(--line);
+    padding:28px 14px;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .ws-name{
+    font-family:'Noto Serif KR',serif;
+    font-weight:700;
+    font-size:16px;
+    padding:0 10px 18px;
+    letter-spacing:-0.01em;
+  }
+  .ws-name span{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:400;
+    font-size:10.5px;
+    color:var(--muted);
+    letter-spacing:.08em;
+    margin-top:3px;
+  }
+  nav button{
+    all:unset;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:8px 10px;
+    border-radius:6px;
+    font-size:14px;
+    color:var(--ink);
+    width:100%;
+  }
+  nav button .ico{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    color:var(--muted);
+    width:30px;
+    flex-shrink:0;
+  }
+  nav button:hover{background:#EBEAE2}
+  nav button.on{background:#E6EFEA;font-weight:600}
+  nav button.on .ico{color:var(--ledger)}
+  nav button:focus-visible{outline:2px solid var(--ledger);outline-offset:1px}
+  .side-foot{
+    margin-top:auto;
+    padding:10px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    color:var(--muted);
+    letter-spacing:.05em;
+  }
+
+  /* ── 본문 ── */
+  main{flex:1;overflow-y:auto;padding:52px 56px 90px}
+  .page{display:none;max-width:700px}
+  .page.on{display:block}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.12em;
+    color:var(--ledger);
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:'Noto Serif KR',serif;
+    font-weight:700;
+    font-size:30px;
+    letter-spacing:-0.02em;
+    margin-bottom:6px;
+  }
+  .sub{color:var(--muted);margin-bottom:34px}
+  h2.sec{
+    font-size:13px;font-weight:600;color:var(--muted);
+    letter-spacing:.08em;margin:30px 0 14px;
+    font-family:'IBM Plex Mono',monospace;
+  }
+
+  .intro p{margin-bottom:14px}
+  .tagrow{display:flex;flex-wrap:wrap;gap:8px}
+  .tag{
+    font-size:12.5px;
+    padding:4px 11px;
+    border:1px solid var(--line);
+    border-radius:99px;
+    background:#fff;
+  }
+
+  /* 항목 카드 */
+  .entry{
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+    padding:18px 20px 16px;
+    margin-bottom:14px;
+  }
+  .entry-top{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:6px;
+  }
+  .fileno{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--ledger);
+    letter-spacing:.06em;
+    white-space:nowrap;
+  }
+  .entry h3{font-size:16px;font-weight:600;letter-spacing:-0.01em}
+  .entry .meta{font-size:12px;color:var(--muted);margin-bottom:8px}
+  .entry p{font-size:14px;color:#3A424B}
+  .entry ul{margin:8px 0 2px 18px;font-size:14px;color:#3A424B}
+  .entry li{margin-bottom:4px}
+  .flag{
+    display:inline-block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    letter-spacing:.1em;
+    color:var(--stamp);
+    border:1px solid var(--stamp);
+    padding:1px 7px;
+    border-radius:3px;
+    margin-left:8px;
+    vertical-align:2px;
+  }
+
+  /* 퀵링크 */
+  .links{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .qlink{
+    display:block;
+    text-decoration:none;
+    color:var(--ink);
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+    padding:13px 16px;
+  }
+  .qlink:hover{border-color:var(--ledger);background:var(--ledger-soft)}
+  .qlink b{display:block;font-size:14px;font-weight:600}
+  .qlink span{font-size:12px;color:var(--muted)}
+  .qlink .domain{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;color:var(--ledger);display:block;margin-top:4px;
+  }
+
+  /* 검색 */
+  .search{
+    width:100%;
+    font-family:inherit;
+    font-size:14px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 14px;
+    margin-bottom:22px;
+    background:#fff;
+    color:var(--ink);
+  }
+  .search:focus{outline:2px solid var(--ledger);outline-offset:-1px}
+  .hidden{display:none}
+
+  /* ── 모바일 ── */
+  @media (max-width:720px){
+    body{flex-direction:column}
+    aside{width:100%;flex-direction:row;align-items:center;padding:12px;gap:2px;overflow-x:auto}
+    .ws-name{padding:0 10px 0 4px;font-size:14px;white-space:nowrap}
+    .ws-name span{display:none}
+    nav{display:flex;gap:2px}
+    nav button{white-space:nowrap;padding:7px 10px}
+    nav button .ico{display:none}
+    .side-foot{display:none}
+    main{padding:30px 20px 70px}
+    h1{font-size:24px}
+    .links{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .page.on{animation:fade .25s ease}
+    @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  }
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="ws-name">채은의 워크스페이스<span>AML · SANCTIONS · CRYPTO</span></div>
+  <nav>
+    <button class="on" data-page="home"><span class="ico">00</span>홈 · 소개</button>
+    <button data-page="links"><span class="ico">REF</span>실무 퀵링크</button>
+    <button data-page="redflags"><span class="ico">RF</span>Red Flag 유형론</button>
+    <button data-page="trends"><span class="ico">TRD</span>최근 동향</button>
+    <button data-page="cases"><span class="ico">CS</span>Case Study</button>
+  </nav>
+  <div class="side-foot">PERSONAL KNOWLEDGE BASE</div>
+</aside>
+
+<main>
+
+  <!-- 홈 -->
+  <section class="page on" id="home">
+    <div class="eyebrow">HOME</div>
+    <h1>AML 지식 아카이브</h1>
+    <p class="sub">자금세탁방지 실무자의 기록 보관소 · KYC → STR → Sanctions</p>
+    <div class="intro">
+      <p>KYC와 STR 실무를 거치며 쌓은 지식을 한곳에 모으는 공간. 규제는 빠르게 바뀌고, 유형론은 흩어져 있고, 케이스는 잊히기 쉽다. 검색 가능한 단일 아카이브로 정리한다.</p>
+      <p><b>실무 퀵링크</b>는 매일 쓰는 제재 리스트·규제기관 바로가기, <b>Red Flag 유형론</b>은 모니터링·CDD 단계에서 참조하는 위험 패턴, <b>최근 동향</b>과 <b>Case Study</b>는 규제 업데이트와 사건 분석이다.</p>
+    </div>
+    <h2 class="sec">FOCUS AREAS</h2>
+    <div class="tagrow">
+      <span class="tag">DPRK 제재</span>
+      <span class="tag">Crypto AML</span>
+      <span class="tag">FATF</span>
+      <span class="tag">OFAC / FinCEN</span>
+      <span class="tag">STR 작성</span>
+      <span class="tag">제재회피 기법</span>
+      <span class="tag">TBML</span>
+    </div>
+  </section>
+
+  <!-- 퀵링크 -->
+  <section class="page" id="links">
+    <div class="eyebrow">REFERENCE</div>
+    <h1>실무 퀵링크</h1>
+    <p class="sub">스크리닝·조사 업무에서 바로 여는 원천 소스</p>
+
+    <h2 class="sec">제재 리스트 검색</h2>
+    <div class="links">
+      <a class="qlink" href="https://sanctionssearch.ofac.treas.gov/" target="_blank" rel="noopener">
+        <b>OFAC Sanctions List Search</b>
+        <span>SDN·Non-SDN 통합 검색. 스크리닝 1차 확인용</span>
+        <span class="domain">sanctionssearch.ofac.treas.gov</span>
+      </a>
+      <a class="qlink" href="https://www.un.org/securitycouncil/content/un-sc-consolidated-list" target="_blank" rel="noopener">
+        <b>UN Consolidated List</b>
+        <span>안보리 통합 제재 리스트 (DPRK 포함)</span>
+        <span class="domain">un.org/securitycouncil</span>
+      </a>
+      <a class="qlink" href="https://www.sanctionsmap.eu/" target="_blank" rel="noopener">
+        <b>EU Sanctions Map</b>
+        <span>EU 제재 체제 시각화. 관할권별 비교에 유용</span>
+        <span class="domain">sanctionsmap.eu</span>
+      </a>
+      <a class="qlink" href="https://www.gov.uk/government/publications/the-uk-sanctions-list" target="_blank" rel="noopener">
+        <b>UK Sanctions List (OFSI)</b>
+        <span>영국 독자 제재 리스트</span>
+        <span class="domain">gov.uk</span>
+      </a>
+    </div>
+
+    <h2 class="sec">규제·정책 원천</h2>
+    <div class="links">
+      <a class="qlink" href="https://www.fatf-gafi.org/" target="_blank" rel="noopener">
+        <b>FATF</b>
+        <span>40 권고사항, 상호평가, 유형론 보고서, 그레이리스트</span>
+        <span class="domain">fatf-gafi.org</span>
+      </a>
+      <a class="qlink" href="https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets" target="_blank" rel="noopener">
+        <b>FinCEN Advisories</b>
+        <span>레드플래그 키워드가 담긴 권고문. STR 작성 참조</span>
+        <span class="domain">fincen.gov</span>
+      </a>
+      <a class="qlink" href="https://ofac.treasury.gov/recent-actions" target="_blank" rel="noopener">
+        <b>OFAC Recent Actions</b>
+        <span>신규 지정·해제 실시간 공지</span>
+        <span class="domain">ofac.treasury.gov</span>
+      </a>
+      <a class="qlink" href="https://www.kofiu.go.kr/" target="_blank" rel="noopener">
+        <b>KoFIU</b>
+        <span>금융정보분석원 — 국내 보고체계·고시</span>
+        <span class="domain">kofiu.go.kr</span>
+      </a>
+    </div>
+
+    <h2 class="sec">DPRK · 크립토 전문 소스</h2>
+    <div class="links">
+      <a class="qlink" href="https://www.38north.org/" target="_blank" rel="noopener">
+        <b>38 North</b>
+        <span>Stimson Center의 북한 분석. 제재회피 심층 리서치</span>
+        <span class="domain">38north.org</span>
+      </a>
+      <a class="qlink" href="https://www.chainalysis.com/blog/" target="_blank" rel="noopener">
+        <b>Chainalysis Blog</b>
+        <span>온체인 추적 사례·연간 Crypto Crime Report</span>
+        <span class="domain">chainalysis.com</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 레드플래그 -->
+  <section class="page" id="redflags">
+    <div class="eyebrow">TYPOLOGY</div>
+    <h1>Red Flag 유형론</h1>
+    <p class="sub">모니터링·CDD 단계에서 참조하는 위험 패턴 정리</p>
+    <input class="search" placeholder="유형 검색 (예: 분산, 법인, 믹서)" oninput="filterEntries(this.value,'rf-list')">
+
+    <div id="rf-list">
+      <article class="entry">
+        <div class="entry-top">
+          <h3>DPRK IT 인력 위장취업 <span class="flag">DPRK</span></h3>
+          <span class="fileno">RF-001</span>
+        </div>
+        <div class="meta">Sanctions Evasion · 급여 수취 패턴</div>
+        <ul>
+          <li>프리랜서 플랫폼 경유 소액·다회 급여 수취, 수취인 명의와 실작업자 불일치 정황</li>
+          <li>화상회의 회피, 신분증 사진과 영상 통화 인물 불일치</li>
+          <li>급여가 즉시 가상자산 거래소나 제3국 계좌로 재이체</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <div class="entry-top">
+          <h3>크립토 세탁: 믹서·체인호핑</h3>
+          <span class="fileno">RF-002</span>
+        </div>
+        <div class="meta">Crypto AML · 거래 패턴</div>
+        <ul>
+          <li>입금 직후 믹서 경유 또는 다수 체인 간 신속한 자산 이동 (체인호핑)</li>
+          <li>해킹 사건 발생 시점 직후 유입되는 대규모 신규 자금</li>
+          <li>P2P·장외거래(OTC) 경유로 KYC가 약한 경로 선택</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <div class="entry-top">
+          <h3>구조화 거래 (Structuring/Smurfing)</h3>
+          <span class="fileno">RF-003</span>
+        </div>
+        <div class="meta">Transaction Monitoring · 고전 유형</div>
+        <ul>
+          <li>보고 기준금액 바로 아래로 반복되는 현금 입출금</li>
+          <li>다수 계좌·다수 명의로 분산 입금 후 단일 계좌로 집결</li>
+          <li>거래 목적과 고객 프로필(직업·소득) 간 불일치</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <div class="entry-top">
+          <h3>법인 구조 악용: 임대법인·페이퍼컴퍼니</h3>
+          <span class="fileno">RF-004</span>
+        </div>
+        <div class="meta">CDD · Beneficial Ownership</div>
+        <ul>
+          <li>실질 사업 활동 대비 과도한 자금 흐름, 임대료 명목 입금의 실질이 이자 수취</li>
+          <li>복잡한 다층 지배구조로 실소유자(UBO) 식별 곤란</li>
+          <li>설립 직후 고액 거래 개시, 동일 주소지 다수 법인</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <div class="entry-top">
+          <h3>무역기반 자금세탁 (TBML)</h3>
+          <span class="fileno">RF-005</span>
+        </div>
+        <div class="meta">Trade Finance · 제재회피 연계</div>
+        <ul>
+          <li>상품 가치 대비 과대·과소 송장 (over/under-invoicing)</li>
+          <li>제3국 경유 환적으로 원산지·최종 수익자 은폐</li>
+          <li>제재 대상국 인접 관할권의 중개무역상 급증 패턴</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <!-- 동향 -->
+  <section class="page" id="trends">
+    <div class="eyebrow">TRENDS</div>
+    <h1>최근 동향</h1>
+    <p class="sub">규제·정책·기술 업데이트 기록</p>
+
+    <div id="trends-list">
+      <article class="entry">
+        <div class="entry-top">
+          <h3>FATF, 가상자산 트래블룰 이행 점검 강화</h3>
+          <span class="fileno">TRD-002</span>
+        </div>
+        <div class="meta">출처: FATF</div>
+        <p>회원국별 트래블룰 이행 격차가 여전히 크다는 점검 결과. 미이행 관할권 경유 거래에 대한 강화된 CDD 필요성 부각.</p>
+      </article>
+
+      <article class="entry">
+        <div class="entry-top">
+          <h3>DPRK IT 노동자 위장취업 적발 확대 <span class="flag">RED FLAG</span></h3>
+          <span class="fileno">TRD-001</span>
+        </div>
+        <div class="meta">출처: OFAC / MSMT</div>
+        <p>원격 개발자로 위장한 북한 IT 인력의 급여 수취 계좌 패턴 주의보. 프리랜서 플랫폼 경유 소액 분산 수취가 전형적 패턴.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- 케이스 -->
+  <section class="page" id="cases">
+    <div class="eyebrow">CASE STUDY</div>
+    <h1>Case Study</h1>
+    <p class="sub">실제 사건 분석 · 수법과 교훈 기록</p>
+
+    <div id="cases-list">
+      <article class="entry">
+        <div class="entry-top">
+          <h3>Lazarus Group — Bybit 해킹 <span class="flag">DPRK</span></h3>
+          <span class="fileno">CS-001</span>
+        </div>
+        <div class="meta">Crypto AML · 제재회피</div>
+        <p>대규모 탈취 후 믹서·체인호핑을 통한 세탁 경로 분석. 탈취 직후 수 시간 내 분산 이동이 핵심 — 거래소 측 실시간 모니터링과 신속 동결 공조의 중요성.</p>
+      </article>
+
+      <article class="entry">
+        <div class="entry-top">
+          <h3>무등록 대부업 — 임대법인 구조 분석</h3>
+          <span class="fileno">CS-002</span>
+        </div>
+        <div class="meta">국내 사례 · STR / CDD</div>
+        <p>무등록 대부업자와 부동산 임대법인의 구조적 연결고리. 임대료 명목 입금의 실질이 이자 수취인 패턴 — CDD 단계의 레드플래그 식별 포인트 정리.</p>
+      </article>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  document.querySelectorAll('nav button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('on'));
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+      btn.classList.add('on');
+      document.getElementById(btn.dataset.page).classList.add('on');
+    });
+  });
+
+  function filterEntries(q, listId){
+    q = q.trim().toLowerCase();
+    document.querySelectorAll('#' + listId + ' .entry').forEach(el => {
+      el.classList.toggle('hidden', q && !el.textContent.toLowerCase().includes(q));
+    });
+  }
+</script>
+</body>
+</html>

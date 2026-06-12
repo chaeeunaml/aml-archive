@@ -196,6 +196,42 @@
   .search:focus{outline:2px solid var(--ledger);outline-offset:-1px}
   .hidden{display:none}
 
+  /* ── 관리자 모드 ── */
+  .admin-toggle{
+    all:unset;cursor:pointer;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;color:var(--muted);letter-spacing:.05em;
+    padding:4px 0;display:block;
+  }
+  .admin-toggle:hover{color:var(--ledger)}
+  .panel{
+    border:1px solid var(--line);border-radius:8px;background:#fff;
+    padding:18px;margin-bottom:22px;
+  }
+  .panel h3{font-size:14px;font-weight:600;margin-bottom:12px}
+  .panel input,.panel textarea,.panel select{
+    width:100%;font-family:inherit;font-size:14px;
+    border:1px solid var(--line);border-radius:6px;
+    padding:9px 11px;margin-bottom:10px;
+    background:var(--paper);color:var(--ink);
+  }
+  .panel textarea{resize:vertical;min-height:90px}
+  .panel input:focus,.panel textarea:focus,.panel select:focus{outline:2px solid var(--ledger);outline-offset:-1px}
+  .panel .btn{
+    all:unset;cursor:pointer;background:var(--ledger);color:#fff;
+    font-size:13.5px;font-weight:600;padding:8px 18px;border-radius:6px;margin-right:8px;
+  }
+  .panel .btn:hover{background:#185A45}
+  .panel .btn.gray{background:#9AA1A9}
+  .panel .hint{font-size:12px;color:var(--muted);margin-bottom:10px}
+  .panel .status{font-size:13px;margin-top:10px;color:var(--ledger)}
+  .panel .status.err{color:var(--stamp)}
+  .del-btn{
+    all:unset;cursor:pointer;font-size:11px;color:var(--stamp);
+    font-family:'IBM Plex Mono',monospace;margin-top:8px;display:none;
+  }
+  body.admin .del-btn{display:inline-block}
+
   /* ── 모바일 ── */
   @media (max-width:720px){
     body{flex-direction:column}
@@ -227,10 +263,42 @@
     <button data-page="trends"><span class="ico">TRD</span>최근 동향</button>
     <button data-page="cases"><span class="ico">CS</span>Case Study</button>
   </nav>
-  <div class="side-foot">PERSONAL KNOWLEDGE BASE</div>
+  <div class="side-foot">
+    PERSONAL KNOWLEDGE BASE
+    <button class="admin-toggle" onclick="toggleAdmin()">⚙ 관리</button>
+  </div>
 </aside>
 
 <main>
+
+  <!-- 관리자 패널 (관리 버튼 클릭 시 표시) -->
+  <div id="admin-area" style="display:none;max-width:700px">
+    <div class="panel" id="setup-panel" style="display:none">
+      <h3>최초 설정 (1회)</h3>
+      <div class="hint">GitHub 사용자명, 저장소명, 토큰을 입력하면 이 브라우저에 저장돼. 토큰 발급법은 안내 참고.</div>
+      <input id="cfg-owner" placeholder="GitHub 사용자명 (예: chaeeun-kim)">
+      <input id="cfg-repo" placeholder="저장소명 (예: aml-archive)">
+      <input id="cfg-token" type="password" placeholder="Personal Access Token (ghp_... 또는 github_pat_...)">
+      <button class="btn" onclick="saveConfig()">저장</button>
+      <div class="status" id="setup-status"></div>
+    </div>
+
+    <div class="panel" id="write-panel" style="display:none">
+      <h3>새 글 쓰기</h3>
+      <select id="w-section">
+        <option value="trends">최근 동향</option>
+        <option value="cases">Case Study</option>
+        <option value="redflags">Red Flag 유형론</option>
+      </select>
+      <input id="w-title" placeholder="제목">
+      <input id="w-meta" placeholder="분류/출처 (예: Crypto AML · 제재회피)">
+      <input id="w-flag" placeholder="플래그 태그 (선택, 예: DPRK / RED FLAG)">
+      <textarea id="w-body" placeholder="내용"></textarea>
+      <button class="btn" onclick="publish()">발행</button>
+      <button class="btn gray" onclick="resetConfig()">설정 초기화</button>
+      <div class="status" id="pub-status"></div>
+    </div>
+  </div>
 
   <!-- 홈 -->
   <section class="page on" id="home">
@@ -454,6 +522,7 @@
 </main>
 
 <script>
+  // ── 페이지 전환 ──
   document.querySelectorAll('nav button').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('nav button').forEach(b => b.classList.remove('on'));
@@ -468,6 +537,154 @@
     document.querySelectorAll('#' + listId + ' .entry').forEach(el => {
       el.classList.toggle('hidden', q && !el.textContent.toLowerCase().includes(q));
     });
+  }
+
+  // ── 동적 글: data.json에서 불러와 렌더링 ──
+  const LISTS = { trends: 'trends-list', cases: 'cases-list', redflags: 'rf-list' };
+  const PREFIX = { trends: 'TRD', cases: 'CS', redflags: 'RF' };
+  let dynamicItems = []; // data.json의 글들
+
+  function renderItem(item){
+    const listEl = document.getElementById(LISTS[item.section]);
+    if(!listEl) return;
+    const art = document.createElement('article');
+    art.className = 'entry';
+    art.dataset.id = item.id;
+    art.innerHTML =
+      '<div class="entry-top"><h3></h3><span class="fileno"></span></div>' +
+      '<div class="meta"></div><p></p>' +
+      '<button class="del-btn" onclick="delItem(this)">✕ 삭제</button>';
+    const h3 = art.querySelector('h3');
+    h3.textContent = item.title;
+    if(item.flag){
+      const f = document.createElement('span');
+      f.className = 'flag'; f.textContent = item.flag;
+      h3.appendChild(f);
+    }
+    art.querySelector('.fileno').textContent = item.no || '';
+    art.querySelector('.meta').textContent = item.meta || '미분류';
+    art.querySelector('p').textContent = item.body || '';
+    listEl.prepend(art);
+  }
+
+  async function loadData(){
+    try{
+      const res = await fetch('data.json?t=' + Date.now()); // 캐시 우회
+      if(!res.ok) return;
+      dynamicItems = await res.json();
+      dynamicItems.forEach(renderItem);
+    }catch(e){ /* data.json 없음 — 기본 글만 표시 */ }
+  }
+  loadData();
+
+  // ── 관리자 모드 ──
+  const CFG_KEY = 'aml-archive-cfg';
+  function getCfg(){
+    try{ return JSON.parse(localStorage.getItem(CFG_KEY)); }catch(e){ return null; }
+  }
+  function toggleAdmin(){
+    const area = document.getElementById('admin-area');
+    const showing = area.style.display !== 'none';
+    if(showing){
+      area.style.display = 'none';
+      document.body.classList.remove('admin');
+      return;
+    }
+    area.style.display = 'block';
+    document.body.classList.add('admin');
+    const cfg = getCfg();
+    document.getElementById('setup-panel').style.display = cfg ? 'none' : 'block';
+    document.getElementById('write-panel').style.display = cfg ? 'block' : 'none';
+  }
+  function saveConfig(){
+    const owner = document.getElementById('cfg-owner').value.trim();
+    const repo  = document.getElementById('cfg-repo').value.trim();
+    const token = document.getElementById('cfg-token').value.trim();
+    const st = document.getElementById('setup-status');
+    if(!owner || !repo || !token){ st.textContent = '세 칸 모두 입력해줘.'; st.className = 'status err'; return; }
+    localStorage.setItem(CFG_KEY, JSON.stringify({owner, repo, token}));
+    st.textContent = '저장 완료.'; st.className = 'status';
+    document.getElementById('setup-panel').style.display = 'none';
+    document.getElementById('write-panel').style.display = 'block';
+  }
+  function resetConfig(){
+    localStorage.removeItem(CFG_KEY);
+    document.getElementById('setup-panel').style.display = 'block';
+    document.getElementById('write-panel').style.display = 'none';
+  }
+
+  // UTF-8 안전 base64 인코딩
+  function b64(str){ return btoa(unescape(encodeURIComponent(str))); }
+
+  async function pushDataJson(items, statusEl){
+    const cfg = getCfg();
+    const api = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/data.json`;
+    const headers = {
+      'Authorization': 'Bearer ' + cfg.token,
+      'Accept': 'application/vnd.github+json'
+    };
+    // 기존 파일 sha 조회 (없으면 신규 생성)
+    let sha = null;
+    const getRes = await fetch(api, { headers });
+    if(getRes.ok){ sha = (await getRes.json()).sha; }
+    const body = {
+      message: 'update data.json',
+      content: b64(JSON.stringify(items, null, 2))
+    };
+    if(sha) body.sha = sha;
+    const putRes = await fetch(api, { method:'PUT', headers, body: JSON.stringify(body) });
+    if(!putRes.ok){
+      const err = await putRes.json().catch(() => ({}));
+      throw new Error(err.message || ('HTTP ' + putRes.status));
+    }
+  }
+
+  async function publish(){
+    const st = document.getElementById('pub-status');
+    const section = document.getElementById('w-section').value;
+    const title = document.getElementById('w-title').value.trim();
+    if(!title){ st.textContent = '제목을 입력해줘.'; st.className = 'status err'; return; }
+    if(!getCfg()){ st.textContent = '먼저 설정을 완료해줘.'; st.className = 'status err'; return; }
+
+    const count = dynamicItems.filter(i => i.section === section).length;
+    const item = {
+      id: Date.now().toString(36),
+      section,
+      no: PREFIX[section] + '-' + String(count + 101).padStart(3,'0'),
+      title,
+      meta: document.getElementById('w-meta').value.trim(),
+      flag: document.getElementById('w-flag').value.trim(),
+      body: document.getElementById('w-body').value.trim(),
+      date: new Date().toISOString().slice(0,10)
+    };
+
+    st.textContent = '발행 중...'; st.className = 'status';
+    try{
+      const updated = [...dynamicItems, item];
+      await pushDataJson(updated, st);
+      dynamicItems = updated;
+      renderItem(item);
+      ['w-title','w-meta','w-flag','w-body'].forEach(id => document.getElementById(id).value = '');
+      st.textContent = '발행 완료. 사이트 전체 반영까지 1~2분.';
+    }catch(e){
+      st.textContent = '발행 실패: ' + e.message + ' (토큰 권한 확인)';
+      st.className = 'status err';
+    }
+  }
+
+  async function delItem(btn){
+    const art = btn.closest('.entry');
+    const id = art.dataset.id;
+    if(!id){ alert('기본 내장 글은 여기서 삭제 불가 — 파일 수정 필요.'); return; }
+    if(!confirm('이 글을 삭제할까?')) return;
+    try{
+      const updated = dynamicItems.filter(i => i.id !== id);
+      await pushDataJson(updated);
+      dynamicItems = updated;
+      art.remove();
+    }catch(e){
+      alert('삭제 실패: ' + e.message);
+    }
   }
 </script>
 </body>
